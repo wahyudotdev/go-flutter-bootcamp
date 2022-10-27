@@ -8,8 +8,8 @@ import (
 func LogBody() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		log.Println("====Headers====")
-		for _, r := range c.GetReqHeaders() {
-			log.Println(r)
+		for k, r := range c.GetReqHeaders() {
+			log.Printf("%s : %s", k, r)
 		}
 		log.Println("====BODY=====")
 		log.Println(string(c.Body()))
