@@ -14,6 +14,12 @@ func Auth() fiber.Handler {
 		jwt := c.Get("Authorization")
 		claims, err := helper.ParseJwt(jwt)
 		if err != nil {
+			if err.Error() == failure.ExpiredToken {
+				return c.Status(http.StatusUnauthorized).JSON(models.GeneralError{
+					Message: "Expired token",
+					Error:   failure.ExpiredToken,
+				})
+			}
 			return c.Status(http.StatusUnauthorized).JSON(models.GeneralError{
 				Message: "Invalid token",
 				Error:   failure.InvalidToken,

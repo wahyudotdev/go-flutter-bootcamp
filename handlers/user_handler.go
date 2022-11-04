@@ -7,6 +7,7 @@ import (
 	"go-flutter-bootcamp/models"
 	"go-flutter-bootcamp/models/failure"
 	"go-flutter-bootcamp/repository/user_repository"
+	"strconv"
 )
 
 type UserHandler struct {
@@ -46,6 +47,61 @@ func (r UserHandler) Create() fiber.Handler {
 	}
 }
 
+func (r UserHandler) GetToken() fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		tokenExp, err := strconv.Atoi(c.Query("expired", "0"))
+		if err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(models.GeneralError{
+				Message: err.Error(),
+				Error:   failure.InvalidInput,
+			})
+		}
+		token, err := helper.SignJwt("", tokenExp)
+		if err != nil {
+			return c.Status(fiber.StatusUnauthorized).JSON(models.GeneralError{
+				Message: "Invalid token",
+				Error:   failure.InvalidToken,
+			})
+		}
+		return c.JSON(models.GeneralResponse{
+			Message: "success",
+			Token:   *token,
+		})
+	}
+}
+
+func (r UserHandler) RefreshToken() fiber.Handler {
+	return func(c *fiber.Ctx) error {
+
+		auth := c.Get("Authorization")
+		claims, err := helper.ParseJwt(auth)
+		if err != nil && err.Error() != failure.ExpiredToken {
+			return c.Status(fiber.StatusUnauthorized).JSON(models.GeneralError{
+				Message: "Invalid Token",
+				Error:   failure.InvalidToken,
+			})
+		}
+		id := claims["id"].(string)
+		if id == "" {
+			return c.Status(fiber.StatusUnauthorized).JSON(models.GeneralError{
+				Message: "Invalid Token",
+				Error:   failure.InvalidToken,
+			})
+		}
+		token, err := helper.SignJwt(id, 5)
+		if err != nil {
+			return c.Status(fiber.StatusUnauthorized).JSON(models.GeneralError{
+				Message: "Invalid Token",
+				Error:   failure.InvalidToken,
+			})
+		}
+		return c.JSON(models.GeneralResponse{
+			Message: "success",
+			Token:   *token,
+		})
+	}
+}
+
 func (r UserHandler) Login() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		reqBody, err := helper.ParseAndValidateBody[models.LoginRequest](c)
@@ -62,9 +118,24 @@ func (r UserHandler) Login() fiber.Handler {
 				Error:   failure.InvalidCredential,
 			})
 		}
+		tokenExp, err := strconv.Atoi(c.Query("expired", "0"))
+		if err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(models.GeneralError{
+				Message: err.Error(),
+				Error:   failure.InvalidInput,
+			})
+		}
+		token, err := helper.SignJwt(data.Id, tokenExp)
+		if err != nil {
+			return c.Status(fiber.StatusUnauthorized).JSON(models.GeneralError{
+				Message: "Login failed",
+				Error:   failure.InvalidCredential,
+			})
+		}
 		return c.JSON(models.GeneralResponse{
 			Message: "success",
 			Data:    data,
+			Token:   *token,
 		})
 	}
 }

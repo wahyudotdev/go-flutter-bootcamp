@@ -49,10 +49,5 @@ func (s SqlRepository) Login(ctx context.Context, req *models.LoginRequest) (*mo
 		return nil, errors.New(failure.InvalidCredential)
 	}
 	result, _ := helper.TypeConverter[models.LoginResponse](&userInDb)
-	token, err := helper.SignJwt(userInDb.Id)
-	if err != nil {
-		return nil, errors.New(failure.InvalidCredential)
-	}
-	result.Token = *token
 	return result, nil
 }

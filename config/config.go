@@ -23,3 +23,7 @@ var Db = func() *gorm.DB {
 	}
 	return db
 }()
+
+var ApiSecret = func() string {
+	return os.Getenv("API_SECRET")
+}()
