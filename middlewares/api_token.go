@@ -7,7 +7,6 @@ import (
 	"go-flutter-bootcamp/models"
 	"go-flutter-bootcamp/models/failure"
 	"strings"
-	"time"
 )
 
 func ApiToken(apiSecret string) fiber.Handler {
@@ -29,21 +28,21 @@ func ApiToken(apiSecret string) fiber.Handler {
 		}
 		decString := string(decByte)
 		data := strings.Split(decString, "|")
-		date, err := time.Parse("2006-01-02", data[0])
-		if err != nil {
-			return c.Status(fiber.StatusBadRequest).JSON(models.GeneralError{
-				Error:   failure.InvalidInput,
-				Message: err.Error(),
-			})
-		}
-		d1 := date.Format("2006-01-02")
-		d2 := time.Now().Format("2006-01-02")
-		if d1 != d2 {
-			return c.Status(fiber.StatusUnauthorized).JSON(models.GeneralError{
-				Error:   failure.InvalidInput,
-				Message: "Expired token",
-			})
-		}
+		//date, err := time.Parse("2006-01-02", data[0])
+		//if err != nil {
+		//	return c.Status(fiber.StatusBadRequest).JSON(models.GeneralError{
+		//		Error:   failure.InvalidInput,
+		//		Message: err.Error(),
+		//	})
+		//}
+		//d1 := date.Format("2006-01-02")
+		//d2 := time.Now().Format("2006-01-02")
+		//if d1 != d2 {
+		//	return c.Status(fiber.StatusUnauthorized).JSON(models.GeneralError{
+		//		Error:   failure.InvalidInput,
+		//		Message: "Expired token",
+		//	})
+		//}
 		if data[1] != apiSecret {
 			return c.Status(fiber.StatusUnauthorized).JSON(models.GeneralError{
 				Error:   failure.InvalidToken,
