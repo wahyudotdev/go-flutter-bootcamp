@@ -43,6 +43,7 @@ func ApiToken(apiSecret string) fiber.Handler {
 		//		Message: "Expired token",
 		//	})
 		//}
+
 		if data[1] != apiSecret {
 			return c.Status(fiber.StatusUnauthorized).JSON(models.GeneralError{
 				Error:   failure.InvalidToken,
