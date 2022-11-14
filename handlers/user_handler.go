@@ -7,6 +7,8 @@ import (
 	"go-flutter-bootcamp/models"
 	"go-flutter-bootcamp/models/failure"
 	"go-flutter-bootcamp/repository/user_repository"
+	"log"
+	"mime/multipart"
 	"strconv"
 )
 
@@ -148,6 +150,44 @@ func (r UserHandler) GetProfile() fiber.Handler {
 			return c.Status(fiber.StatusInternalServerError).JSON(models.GeneralError{
 				Message: err.Error(),
 				Error:   failure.InternalServerError,
+			})
+		}
+		return c.JSON(models.GeneralResponse{
+			Message: "success",
+			Data:    data,
+		})
+	}
+}
+
+func (r UserHandler) UpdateProfile() fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		form, err := c.FormFile("photo")
+		if err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(models.GeneralError{
+				Message: err.Error(),
+				Error:   failure.InvalidInput,
+			})
+		}
+		file, err := form.Open()
+		defer func(file multipart.File) {
+			err := file.Close()
+			if err != nil {
+				log.Fatal(err)
+			}
+		}(file)
+		if err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(models.GeneralError{
+				Message: err.Error(),
+				Error:   failure.InvalidInput,
+			})
+		}
+		reqBody, err := helper.ParseAndValidateBody[models.UpdateProfileRequest](c)
+		user := helper.GetUserFromLocals(c)
+		data, err := r.repo.Update(context.TODO(), user.Id, file, reqBody)
+		if err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(models.GeneralError{
+				Message: err.Error(),
+				Error:   failure.InvalidInput,
 			})
 		}
 		return c.JSON(models.GeneralResponse{

@@ -13,6 +13,7 @@ func User(router fiber.Router) {
 	handler := handlers.NewUserHandler(repo)
 	router.Get("/user/refresh-token", handler.RefreshToken())
 	router.Get("/user/profile", middlewares.Auth(), handler.GetProfile())
+	router.Patch("/user/profile", middlewares.Auth(), handler.UpdateProfile())
 	group := router.Group("/user")
 	if config.ApiSecret != "" {
 		group.Use(middlewares.ApiToken(config.ApiSecret))

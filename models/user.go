@@ -18,14 +18,18 @@ type LoginRequest struct {
 }
 
 type UserDetailResponse struct {
-	Id    string `json:"id"`
-	Name  string `json:"name"`
-	Email string `json:"email"`
-	Photo string `json:"photo"`
+	Id    string `json:"id" gorm:"column:id"`
+	Name  string `json:"name" gorm:"column:name"`
+	Email string `json:"email" gorm:"column:email"`
+	Photo string `json:"photo" gorm:"column:photo"`
 }
 
 type CreateUserRequest struct {
 	Name     string `json:"name" validate:"required" form:"name"`
 	Email    string `json:"email" validate:"required,email" form:"email"`
 	Password string `json:"password" validate:"required,min=8" form:"password"`
+}
+
+type UpdateProfileRequest struct {
+	Name string `json:"name,omitempty" form:"name" validate:"required"`
 }
