@@ -17,7 +17,7 @@ type LoginRequest struct {
 	Password string `json:"password" form:"password"`
 }
 
-type LoginResponse struct {
+type UserDetailResponse struct {
 	Id    string `json:"id"`
 	Name  string `json:"name"`
 	Email string `json:"email"`

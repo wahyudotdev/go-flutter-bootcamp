@@ -21,6 +21,19 @@ type SqlRepository struct {
 	db *gorm.DB
 }
 
+func (s SqlRepository) Detail(ctx context.Context, userId string) (*models.UserDetailResponse, error) {
+	var dataInDb *models.UserEntity
+	tx := s.db.WithContext(ctx).Raw("SELECT * FROM user WHERE id = ?", userId).Scan(&dataInDb)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+	if tx.RowsAffected == 0 {
+		return nil, errors.New(failure.NotFound)
+	}
+	result, _ := helper.TypeConverter[models.UserDetailResponse](dataInDb)
+	return result, nil
+}
+
 func (s SqlRepository) Create(ctx context.Context, req *models.CreateUserRequest) error {
 	var userInDb *models.UserEntity
 	tx := s.db.WithContext(ctx).Raw("SELECT * FROM user WHERE email = ?", req.Email).Scan(&userInDb)
@@ -39,7 +52,7 @@ func (s SqlRepository) Create(ctx context.Context, req *models.CreateUserRequest
 	return tx.Error
 }
 
-func (s SqlRepository) Login(ctx context.Context, req *models.LoginRequest) (*models.LoginResponse, error) {
+func (s SqlRepository) Login(ctx context.Context, req *models.LoginRequest) (*models.UserDetailResponse, error) {
 	var userInDb *models.UserEntity
 	tx := s.db.WithContext(ctx).Raw("SELECT * FROM user WHERE email = ?", req.Email).Scan(&userInDb)
 	if tx.RowsAffected == 0 {
@@ -49,6 +62,6 @@ func (s SqlRepository) Login(ctx context.Context, req *models.LoginRequest) (*mo
 	if err != nil {
 		return nil, errors.New(failure.InvalidCredential)
 	}
-	result, _ := helper.TypeConverter[models.LoginResponse](&userInDb)
+	result, _ := helper.TypeConverter[models.UserDetailResponse](&userInDb)
 	return result, nil
 }

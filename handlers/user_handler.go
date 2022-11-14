@@ -139,3 +139,20 @@ func (r UserHandler) Login() fiber.Handler {
 		})
 	}
 }
+
+func (r UserHandler) GetProfile() fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		user := helper.GetUserFromLocals(c)
+		data, err := r.repo.Detail(context.TODO(), user.Id)
+		if err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(models.GeneralError{
+				Message: err.Error(),
+				Error:   failure.InternalServerError,
+			})
+		}
+		return c.JSON(models.GeneralResponse{
+			Message: "success",
+			Data:    data,
+		})
+	}
+}
