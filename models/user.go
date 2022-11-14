@@ -5,6 +5,7 @@ type UserEntity struct {
 	Name     string `json:"name" gorm:"column:name"`
 	Email    string `json:"email" gorm:"column:email"`
 	Password string `json:"password" gorm:"column:password"`
+	Photo    string `json:"photo" gorm:"column:photo"`
 }
 
 func (r UserEntity) TableName() string {
@@ -20,6 +21,7 @@ type LoginResponse struct {
 	Id    string `json:"id"`
 	Name  string `json:"name"`
 	Email string `json:"email"`
+	Photo string `json:"photo"`
 }
 
 type CreateUserRequest struct {

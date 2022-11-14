@@ -11,6 +11,7 @@ import (
 func User(router fiber.Router) {
 	repo := user_repository.New(config.Db)
 	handler := handlers.NewUserHandler(repo)
+	router.Get("/user/refresh-token", handler.RefreshToken())
 	group := router.Group("/user")
 	if config.ApiSecret != "" {
 		group.Use(middlewares.ApiToken(config.ApiSecret))
@@ -19,6 +20,5 @@ func User(router fiber.Router) {
 	{
 		group.Post("/", handler.Create())
 		group.Post("/login", handler.Login())
-		group.Get("/refresh-token", handler.RefreshToken())
 	}
 }

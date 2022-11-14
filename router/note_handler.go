@@ -19,5 +19,6 @@ func Note(router fiber.Router) {
 		group.Post("/", middlewares.Auth(), handler.Create())
 		group.Get("/", middlewares.Auth(), handler.GetAll())
 		group.Delete("/:id", middlewares.Auth(), handler.Delete())
+		group.Patch("/:id", middlewares.Auth(), handler.Update())
 	}
 }

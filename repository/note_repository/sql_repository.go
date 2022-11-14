@@ -7,6 +7,7 @@ import (
 	"go-flutter-bootcamp/models"
 	"gorm.io/gorm"
 	"log"
+	"time"
 )
 
 func New(db *gorm.DB) Repository {
@@ -21,6 +22,16 @@ func New(db *gorm.DB) Repository {
 
 type SqlRepository struct {
 	db *gorm.DB
+}
+
+func (s SqlRepository) Update(ctx context.Context, ownerId string, noteId string, req *models.UpdateNotes) error {
+	query := "UPDATE note SET title = ?, content = ?, updated_at = ? WHERE owner_id = ? and id = ?"
+	updatedAt := time.Now().UnixMilli()
+	tx := s.db.WithContext(ctx).Exec(query, req.Title, req.Content, updatedAt, ownerId, noteId)
+	if tx.Error != nil {
+		return tx.Error
+	}
+	return nil
 }
 
 func (s SqlRepository) Create(ctx context.Context, ownerId string, req *models.CreateNoteRequest) error {

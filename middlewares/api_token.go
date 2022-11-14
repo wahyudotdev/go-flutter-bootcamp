@@ -25,7 +25,7 @@ func ApiToken(apiSecret string) fiber.Handler {
 		}
 		decByte, err := base64.StdEncoding.DecodeString(token)
 		if err != nil {
-
+			return err
 		}
 		decString := string(decByte)
 		data := strings.Split(decString, "|")

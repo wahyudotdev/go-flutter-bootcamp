@@ -71,3 +71,25 @@ func (r NoteHandler) Delete() fiber.Handler {
 		return c.JSON(models.GeneralResponse{Message: "note has been deleted"})
 	}
 }
+
+func (r NoteHandler) Update() fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		reqBody, err := helper.ParseAndValidateBody[models.UpdateNotes](c)
+		if err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(models.GeneralError{
+				Message: "Invalid data",
+				Error:   failure.InvalidInput,
+			})
+		}
+		id := c.Params("id")
+		user := helper.GetUserFromLocals(c)
+		err = r.repo.Update(context.TODO(), user.Id, id, reqBody)
+		if err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(models.GeneralError{
+				Message: err.Error(),
+				Error:   failure.InternalServerError,
+			})
+		}
+		return c.JSON(models.GeneralResponse{Message: "note has been updated"})
+	}
+}

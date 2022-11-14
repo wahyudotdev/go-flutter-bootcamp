@@ -34,6 +34,7 @@ func (s SqlRepository) Create(ctx context.Context, req *models.CreateUserRequest
 	}
 	data.Id = uuid.NewString()
 	data.Password = password
+	data.Photo = "https://ui-avatars.com/api/?name=" + req.Name + "&background=EBF4FF&size=128"
 	tx = s.db.WithContext(ctx).Model(models.UserEntity{}).Create(&data)
 	return tx.Error
 }
