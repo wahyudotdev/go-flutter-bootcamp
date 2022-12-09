@@ -9,4 +9,4 @@ services:
       BASE_URL: "http://34.128.80.67"
     restart: always
     ports:
-      - "8000:8000"
+      - "80:80"
