@@ -31,41 +31,42 @@ type SqlRepository struct {
 	db *gorm.DB
 }
 
-func (s SqlRepository) Update(ctx context.Context, userId string, file multipart.File, req *models.UpdateProfileRequest) (*models.UserDetailResponse, error) {
-	fileName := utils.UUID() + ".jpg"
-	path := fmt.Sprintf("./%s/%s", config.PublicDir, fileName)
-	if _, err := os.Stat(config.PublicDir); os.IsNotExist(err) {
-		err := os.Mkdir(config.PublicDir, 0777)
+func (s SqlRepository) Update(ctx context.Context, userId string, file *multipart.File, req *models.UpdateProfileRequest) (*models.UserDetailResponse, error) {
+	data, _ := helper.TypeConverter[models.UserEntity](&req)
+	if file != (*multipart.File)(nil) {
+		fileName := utils.UUID() + ".jpg"
+		path := fmt.Sprintf("./%s/%s", config.PublicDir, fileName)
+		if _, err := os.Stat(config.PublicDir); os.IsNotExist(err) {
+			err := os.Mkdir(config.PublicDir, 0777)
+			if err != nil {
+				return nil, err
+			}
+		}
+		fo, err := os.Create(path)
 		if err != nil {
 			return nil, err
 		}
-	}
-	fo, err := os.Create(path)
-	if err != nil {
-		return nil, err
-	}
-	defer func() {
-		if err := fo.Close(); err != nil {
-			panic(err)
-		}
-	}()
+		defer func() {
+			if err := fo.Close(); err != nil {
+				panic(err)
+			}
+		}()
 
-	buf := make([]byte, 1024)
-	for {
-		n, err := file.Read(buf)
-		if err != nil && err != io.EOF {
-			panic(err)
+		buf := make([]byte, 1024)
+		for {
+			n, err := (*file).Read(buf)
+			if err != nil && err != io.EOF {
+				panic(err)
+			}
+			if n == 0 {
+				break
+			}
+			if _, err := fo.Write(buf[:n]); err != nil {
+				panic(err)
+			}
 		}
-		if n == 0 {
-			break
-		}
-		if _, err := fo.Write(buf[:n]); err != nil {
-			panic(err)
-		}
+		data.Photo = fmt.Sprintf("%s/%s/%s", config.BaseUrl, config.PublicDir, fileName)
 	}
-
-	data, _ := helper.TypeConverter[models.UserEntity](&req)
-	data.Photo = fmt.Sprintf("%s/%s/%s", config.BaseUrl, config.PublicDir, fileName)
 	if err := s.db.WithContext(ctx).Model(models.UserEntity{}).Where("id = ?", userId).Updates(&data).Error; err != nil {
 		return nil, err
 	}
@@ -73,7 +74,7 @@ func (s SqlRepository) Update(ctx context.Context, userId string, file multipart
 	if err := s.db.WithContext(ctx).Raw("SELECT * FROM user WHERE id = ?", userId).Scan(&dataInDb).Error; err != nil {
 		return nil, err
 	}
-	return dataInDb, err
+	return dataInDb, nil
 }
 
 func (s SqlRepository) Detail(ctx context.Context, userId string) (*models.UserDetailResponse, error) {

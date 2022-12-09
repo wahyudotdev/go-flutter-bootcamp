@@ -161,25 +161,23 @@ func (r UserHandler) GetProfile() fiber.Handler {
 
 func (r UserHandler) UpdateProfile() fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		form, err := c.FormFile("photo")
-		if err != nil {
-			return c.Status(fiber.StatusBadRequest).JSON(models.GeneralError{
-				Message: err.Error(),
-				Error:   failure.InvalidInput,
-			})
-		}
-		file, err := form.Open()
-		defer func(file multipart.File) {
-			err := file.Close()
+		var file *multipart.File
+		form, _ := c.FormFile("photo")
+		if form != nil {
+			f, err := form.Open()
+			defer func(f multipart.File) {
+				err := f.Close()
+				if err != nil {
+					log.Fatal(err)
+				}
+			}(f)
+			file = &f
 			if err != nil {
-				log.Fatal(err)
+				return c.Status(fiber.StatusBadRequest).JSON(models.GeneralError{
+					Message: err.Error(),
+					Error:   failure.InvalidInput,
+				})
 			}
-		}(file)
-		if err != nil {
-			return c.Status(fiber.StatusBadRequest).JSON(models.GeneralError{
-				Message: err.Error(),
-				Error:   failure.InvalidInput,
-			})
 		}
 		reqBody, err := helper.ParseAndValidateBody[models.UpdateProfileRequest](c)
 		user := helper.GetUserFromLocals(c)
