@@ -4,8 +4,9 @@ services:
   app:
     build: .
     environment:
-      PORT: "8000"
-      API_SECRET: "crocodichebat"
+      PORT: "80"
+      API_SECRET: "rahasia"
+      BASE_URL: "http://34.128.80.67"
     restart: always
     ports:
       - "8000:8000"
