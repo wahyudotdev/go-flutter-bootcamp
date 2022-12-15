@@ -38,6 +38,8 @@ func (s SqlRepository) Create(ctx context.Context, ownerId string, req *models.C
 	data, _ := helper.TypeConverter[models.NoteEntity](&req)
 	data.OwnerId = ownerId
 	data.Id = uuid.NewString()
+	data.CreatedAt = time.Now().UnixMilli()
+	data.UpdatedAt = time.Now().UnixMilli()
 	tx := s.db.WithContext(ctx).Model(models.NoteEntity{}).Create(&data)
 	return tx.Error
 }

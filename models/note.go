@@ -2,7 +2,6 @@ package models
 
 import (
 	"gorm.io/gorm"
-	"time"
 )
 
 type NoteEntity struct {
@@ -19,7 +18,6 @@ func (r NoteEntity) TableName() string {
 }
 
 func (r NoteEntity) BeforeCreate(*gorm.DB) error {
-	r.CreatedAt = time.Now().UnixMilli()
 	return nil
 }
 
