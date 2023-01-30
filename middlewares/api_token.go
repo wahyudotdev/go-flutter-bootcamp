@@ -22,6 +22,12 @@ func ApiToken(apiSecret string) fiber.Handler {
 		if err == nil {
 			return c.Next()
 		}
+		if err.Error() == failure.ExpiredToken {
+			return c.Status(fiber.StatusUnauthorized).JSON(models.GeneralError{
+				Error:   failure.ExpiredToken,
+				Message: "please refresh your token",
+			})
+		}
 		decByte, err := base64.StdEncoding.DecodeString(token)
 		if err != nil {
 			return err

@@ -43,7 +43,14 @@ func (r NoteHandler) Create() fiber.Handler {
 func (r NoteHandler) GetAll() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		user := helper.GetUserFromLocals(c)
-		data, err := r.repo.GetAll(context.TODO(), user.Id)
+		reqQuery, err := helper.ParseAndValidateQuery[models.GetNoteRequest](c)
+		if err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(models.GeneralError{
+				Error:   failure.InvalidInput,
+				Message: err.Error(),
+			})
+		}
+		data, err := r.repo.GetAll(context.TODO(), user.Id, reqQuery)
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(models.GeneralError{
 				Message: err.Error(),

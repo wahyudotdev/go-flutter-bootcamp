@@ -2,15 +2,15 @@ package router
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"go-flutter-bootcamp/config"
 	"go-flutter-bootcamp/handlers"
 	"go-flutter-bootcamp/middlewares"
 	"go-flutter-bootcamp/repository/note_repository"
+	"gorm.io/gorm"
 )
 
-func Note(router fiber.Router) {
+func Note(router fiber.Router, db *gorm.DB) {
 
-	repo := note_repository.New(config.Db)
+	repo := note_repository.New(db)
 
 	handler := handlers.NewNoteHandler(repo)
 

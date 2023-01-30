@@ -6,10 +6,11 @@ import (
 	"go-flutter-bootcamp/handlers"
 	"go-flutter-bootcamp/middlewares"
 	"go-flutter-bootcamp/repository/user_repository"
+	"gorm.io/gorm"
 )
 
-func User(router fiber.Router) {
-	repo := user_repository.New(config.Db)
+func User(router fiber.Router, db *gorm.DB) {
+	repo := user_repository.New(db)
 	handler := handlers.NewUserHandler(repo)
 	router.Get("/user/refresh-token", handler.RefreshToken())
 	router.Get("/user/profile", middlewares.Auth(), handler.GetProfile())

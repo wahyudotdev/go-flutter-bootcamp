@@ -2,6 +2,7 @@ package note_repository
 
 import (
 	"context"
+	"database/sql"
 	"github.com/google/uuid"
 	"go-flutter-bootcamp/helper"
 	"go-flutter-bootcamp/models"
@@ -49,9 +50,14 @@ func (s SqlRepository) Delete(ctx context.Context, ownerId string, noteId string
 	return tx.Error
 }
 
-func (s SqlRepository) GetAll(ctx context.Context, ownerId string) (*[]models.NoteResponse, error) {
+func (s SqlRepository) GetAll(ctx context.Context, ownerId string, req *models.GetNoteRequest) (*[]models.NoteResponse, error) {
 	notes := make([]models.NoteResponse, 0)
-	tx := s.db.WithContext(ctx).Raw("SELECT * FROM note WHERE owner_id = ?", ownerId).Scan(&notes)
+	offset := (req.Page - 1) * req.Limit
+	query := "SELECT * FROM note WHERE owner_id = @ownerId"
+	if req.Page > 0 {
+		query = "SELECT * FROM note WHERE owner_id = @ownerId LIMIT @limit OFFSET @offset"
+	}
+	tx := s.db.WithContext(ctx).Raw(query, sql.Named("ownerId", ownerId), sql.Named("limit", req.Limit), sql.Named("offset", offset)).Scan(&notes)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
