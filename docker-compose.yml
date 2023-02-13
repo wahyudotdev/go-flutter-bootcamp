@@ -1,12 +1,17 @@
 version: '3.9'
 
+volumes:
+  db:
+
 services:
   app:
-    build: .
+    image: wahyudotdev/my-notes:latest
     environment:
       PORT: "80"
       API_SECRET: "rahasia"
-      BASE_URL: "http://34.128.80.67"
+      BASE_URL: "http://3.0.19.212"
     restart: always
     ports:
       - "80:80"
+    volumes:
+      - db:/app
